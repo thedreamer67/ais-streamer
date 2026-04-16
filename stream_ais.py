@@ -13,7 +13,7 @@ Output:
     data/ais_YYYYMMDD_hourHH.csv  (one file per UTC hour of data received)
 
 Dependencies:
-    pip install websockets
+    pip install -r requirements-min.txt
 """
 
 import argparse
