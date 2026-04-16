@@ -30,10 +30,15 @@ from typing import Optional
 import websockets
 from dotenv import load_dotenv
 
+
 load_dotenv()
-API_KEY = os.environ['AISSTREAM_API_KEY']
-
-
+try:
+    API_KEY = os.environ['AISSTREAM_API_KEY']
+except KeyError:
+    print("Error: AISSTREAM_API_KEY not found. Add it to your .env file.")
+    sys.exit(1)
+ 
+ 
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
@@ -75,7 +80,7 @@ AISSTREAM_URL = "wss://stream.aisstream.io/v0/stream"
 
 
 # ---------------------------------------------------------------------------
-# Hourly CSV manager
+# CSV manager — keyed by (date_str, hour) so date rolls over automatically
 # ---------------------------------------------------------------------------
 
 class HourlyCsvManager:
