@@ -5,9 +5,9 @@ Streams AIS position reports (types 1, 2, 3) from aisstream.io globally
 and writes one CSV file per UTC hour.
 
 Usage:
-    python stream_ais.py --api-key YOUR_KEY
-    python stream_ais.py --api-key YOUR_KEY --date 2024-06-15
-    python stream_ais.py --api-key YOUR_KEY --limit 1000   # test run
+    python stream_ais.py
+    python stream_ais.py --output-dir "/path/to/dir"
+    python stream_ais.py --limit 1000   # test run
 
 Output:
     data/ais_YYYYMMDD_hourHH.csv  (one file per UTC hour of data received)
@@ -171,10 +171,9 @@ def parse_position_message(raw: dict) -> Optional[tuple[int, dict]]:
 # WebSocket streamer
 # ---------------------------------------------------------------------------
 
-async def stream(api_key: str, target_date: date, output_dir: Path, limit: Optional[int]):
-    date_str = target_date.strftime("%Y%m%d")
+async def stream(api_key: str, output_dir: Path, limit: Optional[int]):
     output_dir.mkdir(parents=True, exist_ok=True)
-    csv_mgr = HourlyCsvManager(output_dir, date_str)
+    csv_mgr = HourlyCsvManager(output_dir)
 
     subscribe = {
         "APIKey": api_key,
@@ -249,10 +248,6 @@ def main():
         )
     )
     parser.add_argument(
-        "--date", default=date.today().isoformat(),
-        help="Date label used in output filenames (YYYY-MM-DD). Default: today."
-    )
-    parser.add_argument(
         "--output-dir", default="data",
         help="Directory to write CSV files into. Default: ./data/"
     )
@@ -262,15 +257,8 @@ def main():
     )
     args = parser.parse_args()
 
-    try:
-        target_date = date.fromisoformat(args.date)
-    except ValueError:
-        log.error("Invalid date: %s (expected YYYY-MM-DD)", args.date)
-        sys.exit(1)
-
     asyncio.run(stream(
         api_key=API_KEY,
-        target_date=target_date,
         output_dir=Path(args.output_dir),
         limit=args.limit,
     ))
